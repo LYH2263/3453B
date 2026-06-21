@@ -477,3 +477,130 @@ INSERT INTO venue_bookings (venue_id, club_id, start_time, end_time, purpose, st
 (2, 2, '2024-05-21 09:00:00', '2024-05-21 12:00:00', '声乐公开课', 'APPROVED', 4, 1, NULL),
 (3, 2, '2024-05-22 15:00:00', '2024-05-22 18:00:00', '舞蹈队训练', 'PENDING', 4, NULL, NULL),
 (4, 1, '2024-05-23 10:00:00', '2024-05-23 12:00:00', '社团例会', 'REJECTED', 3, 2, '该时段已有其他社团预约');
+
+-- 积分规则表
+CREATE TABLE IF NOT EXISTS point_rules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rule_code VARCHAR(100) NOT NULL UNIQUE COMMENT '规则编码',
+    rule_name VARCHAR(200) NOT NULL COMMENT '规则名称',
+    rule_json JSON NOT NULL COMMENT '规则详情JSON',
+    description VARCHAR(500) DEFAULT NULL COMMENT '规则描述',
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE' COMMENT '状态',
+    creator_id INT DEFAULT NULL COMMENT '创建人ID',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (creator_id) REFERENCES users(id),
+    INDEX idx_rule_code (rule_code),
+    INDEX idx_status (status)
+) COMMENT='积分规则表';
+
+-- 积分流水表
+CREATE TABLE IF NOT EXISTS point_ledger (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL COMMENT '用户ID',
+    delta INT NOT NULL COMMENT '积分变动(正数增加,负数扣减)',
+    reason VARCHAR(200) NOT NULL COMMENT '变动原因',
+    ref_type VARCHAR(50) DEFAULT NULL COMMENT '关联类型',
+    ref_id INT DEFAULT NULL COMMENT '关联ID',
+    balance_snapshot INT NOT NULL COMMENT '变动后余额快照',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_ref (ref_type, ref_id),
+    INDEX idx_create_time (create_time)
+) COMMENT='积分流水表';
+
+-- 积分余额表(为了高效查询当前余额,避免每次都sum流水)
+CREATE TABLE IF NOT EXISTS user_points (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE COMMENT '用户ID',
+    balance INT NOT NULL DEFAULT 0 COMMENT '当前积分余额',
+    total_earned INT NOT NULL DEFAULT 0 COMMENT '累计获得积分',
+    total_spent INT NOT NULL DEFAULT 0 COMMENT '累计消费积分',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) COMMENT='用户积分表';
+
+-- 商城商品表
+CREATE TABLE IF NOT EXISTS shop_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(200) NOT NULL COMMENT '商品名称',
+    description TEXT COMMENT '商品描述',
+    image_url VARCHAR(500) DEFAULT NULL COMMENT '商品图片URL',
+    cost_points INT NOT NULL COMMENT '所需积分',
+    stock INT NOT NULL DEFAULT 0 COMMENT '库存数量',
+    club_id INT DEFAULT NULL COMMENT '所属社团ID(NULL为全校商品)',
+    status ENUM('ON_SALE', 'OFF_SALE') NOT NULL DEFAULT 'ON_SALE' COMMENT '状态: 上架/下架',
+    sort_order INT NOT NULL DEFAULT 0 COMMENT '排序',
+    creator_id INT DEFAULT NULL COMMENT '创建人ID',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (club_id) REFERENCES clubs(id),
+    FOREIGN KEY (creator_id) REFERENCES users(id),
+    INDEX idx_club_id (club_id),
+    INDEX idx_status (status),
+    INDEX idx_sort (sort_order)
+) COMMENT='商城商品表';
+
+-- 兑换订单表
+CREATE TABLE IF NOT EXISTS redeem_orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_no VARCHAR(50) NOT NULL UNIQUE COMMENT '订单号',
+    user_id INT NOT NULL COMMENT '用户ID',
+    item_id INT NOT NULL COMMENT '商品ID',
+    item_name VARCHAR(200) NOT NULL COMMENT '商品名称快照',
+    item_image VARCHAR(500) DEFAULT NULL COMMENT '商品图片快照',
+    cost_points INT NOT NULL COMMENT '消耗积分',
+    quantity INT NOT NULL DEFAULT 1 COMMENT '兑换数量',
+    status ENUM('PENDING', 'COMPLETED', 'CANCELLED', 'FAILED') NOT NULL DEFAULT 'PENDING' COMMENT '状态',
+    remark VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (item_id) REFERENCES shop_items(id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_item_id (item_id),
+    INDEX idx_status (status),
+    INDEX idx_create_time (create_time)
+) COMMENT='兑换订单表';
+
+-- 积分规则测试数据
+INSERT INTO point_rules (rule_code, rule_name, rule_json, description, status, creator_id) VALUES
+('ACTIVITY_SIGN_IN', '活动签到', '{"points": 10, "dailyLimit": 1}', '参与活动签到可获得积分', 'ACTIVE', 1),
+('CREATE_TOPIC', '发布话题', '{"points": 5, "dailyLimit": 3}', '发布话题可获得积分', 'ACTIVE', 1),
+('CREATE_COMMENT', '发表评论', '{"points": 2, "dailyLimit": 10}', '发表评论可获得积分', 'ACTIVE', 1),
+('VOLUNTEER_HOUR', '志愿服务时长', '{"pointsPerHour": 5}', '每小时志愿服务可获得积分', 'ACTIVE', 1),
+('ACTIVITY_REGISTER', '活动报名', '{"points": 3}', '报名参加活动可获得积分', 'ACTIVE', 1);
+
+-- 用户积分测试数据
+INSERT INTO user_points (user_id, balance, total_earned, total_spent) VALUES
+(5, 150, 200, 50),
+(6, 80, 80, 0),
+(8, 30, 30, 0);
+
+-- 积分流水测试数据
+INSERT INTO point_ledger (user_id, delta, reason, ref_type, ref_id, balance_snapshot) VALUES
+(5, 100, '初始赠送', 'SYSTEM', 1, 100),
+(5, 50, '活动签到奖励', 'ACTIVITY', 1, 150),
+(5, 50, '兑换商品-笔记本', 'REDEEM', 1, 100),
+(5, 50, '志愿服务奖励', 'VOLUNTEER', 1, 150),
+(6, 80, '初始赠送', 'SYSTEM', 1, 80),
+(8, 30, '初始赠送', 'SYSTEM', 1, 30);
+
+-- 商城商品测试数据
+INSERT INTO shop_items (name, description, image_url, cost_points, stock, club_id, status, sort_order, creator_id) VALUES
+('定制笔记本', '社团定制精美笔记本，封面印有社团Logo', '/mock_images/media__1772178695205.png', 50, 100, NULL, 'ON_SALE', 1, 1),
+('运动水杯', '大容量运动水杯，食品级材质', '/mock_images/media__1772178708344.png', 80, 50, NULL, 'ON_SALE', 2, 1),
+('极客社定制T恤', '极客电子社专属定制T恤，纯棉材质', '/mock_images/media__17721787314576.png', 120, 30, 1, 'ON_SALE', 1, 3),
+('艺术社明信片套装', '悦动艺术社精美明信片套装，含12张原创设计', '/mock_images/media__1772178768576.png', 60, 80, 2, 'ON_SALE', 1, 4),
+('蓝牙音箱', '便携蓝牙音箱，音质清晰', NULL, 200, 20, NULL, 'ON_SALE', 3, 1),
+('钥匙扣挂件', '可爱卡通钥匙扣挂件', NULL, 20, 200, NULL, 'ON_SALE', 4, 1);
+
+-- 兑换订单测试数据
+INSERT INTO redeem_orders (order_no, user_id, item_id, item_name, item_image, cost_points, quantity, status, remark) VALUES
+('PO202403150001', 5, 1, '定制笔记本', '/mock_images/media__1772178695205.png', 50, 1, 'COMPLETED', NULL),
+('PO202403200001', 5, 3, '极客社定制T恤', '/mock_images/media__17721787314576.png', 120, 1, 'PENDING', NULL);

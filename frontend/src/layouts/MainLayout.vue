@@ -34,6 +34,14 @@
           <el-icon><Reading /></el-icon>
           <span>培训课程</span>
         </el-menu-item>
+        <el-menu-item index="/venues">
+          <el-icon><OfficeBuilding /></el-icon>
+          <span>场地预约</span>
+        </el-menu-item>
+        <el-menu-item index="/points">
+          <el-icon><ShoppingCart /></el-icon>
+          <span>积分商城</span>
+        </el-menu-item>
         <el-menu-item index="/profile">
           <el-icon><User /></el-icon>
           <span>个人中心</span>
@@ -135,6 +143,8 @@ const currentRouteName = computed(() => {
     '/votes': '社团投票',
     '/volunteer': '志愿服务',
     '/courses': '培训课程',
+    '/venues': '场地预约',
+    '/points': '积分商城',
     '/profile': '个人中心',
     '/admin/users': '用户管理',
     '/admin/dashboard': '管理看板',

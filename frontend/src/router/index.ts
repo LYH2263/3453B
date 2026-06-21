@@ -107,6 +107,12 @@ const router = createRouter({
                     name: 'Venues',
                     component: () => import('../views/venues/index.vue'),
                     meta: { requiresAuth: true }
+                },
+                {
+                    path: 'points',
+                    name: 'Points',
+                    component: () => import('../views/points/index.vue'),
+                    meta: { requiresAuth: true }
                 }
             ]
         },
