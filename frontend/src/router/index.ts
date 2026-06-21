@@ -119,6 +119,12 @@ const router = createRouter({
                     name: 'Inspections',
                     component: () => import('../views/inspections/index.vue'),
                     meta: { requiresAuth: true }
+                },
+                {
+                    path: 'campus-map',
+                    name: 'CampusMap',
+                    component: () => import('../views/campus-map/index.vue'),
+                    meta: { requiresAuth: true }
                 }
             ]
         },

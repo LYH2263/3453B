@@ -46,6 +46,10 @@
           <el-icon><Monitor /></el-icon>
           <span>设备巡检</span>
         </el-menu-item>
+        <el-menu-item index="/campus-map">
+          <el-icon><MapLocation /></el-icon>
+          <span>校园据点</span>
+        </el-menu-item>
         <el-menu-item index="/profile">
           <el-icon><User /></el-icon>
           <span>个人中心</span>
@@ -150,6 +154,7 @@ const currentRouteName = computed(() => {
     '/venues': '场地预约',
     '/points': '积分商城',
     '/inspections': '设备巡检',
+    '/campus-map': '校园据点',
     '/profile': '个人中心',
     '/admin/users': '用户管理',
     '/admin/dashboard': '管理看板',

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.club.common.Result;
 import com.club.common.annotation.Log;
 import com.club.entity.Club;
+import com.club.service.ClubLocationService;
 import com.club.service.ClubService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 public class ClubController {
     @Autowired
     private ClubService clubService;
+
+    @Autowired
+    private ClubLocationService clubLocationService;
 
 
     @Log("查询社团列表")
@@ -43,7 +47,9 @@ public class ClubController {
         Club club = new Club();
         club.setId(id);
         club.setStatus("RETIRED");
-        return Result.success(clubService.updateById(club));
+        clubService.updateById(club);
+        clubLocationService.deleteByClubId(id);
+        return Result.success(null);
     }
 
     @Log("查看社团看板")

@@ -102,6 +102,13 @@ public class SecurityConfig {
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
                 .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/inspections/plans/*").hasAnyRole(
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                // 社团据点管理：写操作仅管理员/社联/社团负责人，读操作登录后可访问
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/club-locations").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/club-locations").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/club-locations/*").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
                 // 其余接口需登录
                 .anyRequest().authenticated()
             )
