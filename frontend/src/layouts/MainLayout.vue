@@ -50,6 +50,10 @@
           <el-icon><MapLocation /></el-icon>
           <span>校园据点</span>
         </el-menu-item>
+        <el-menu-item index="/mentorship">
+          <el-icon><Avatar /></el-icon>
+          <span>导师答疑</span>
+        </el-menu-item>
         <!-- 社团负责人及以上可见 -->
         <template v-if="isClubLeader">
           <el-menu-item index="/partners">
@@ -162,6 +166,7 @@ const currentRouteName = computed(() => {
     '/points': '积分商城',
     '/inspections': '设备巡检',
     '/campus-map': '校园据点',
+    '/mentorship': '导师答疑',
     '/partners': '合作伙伴',
     '/profile': '个人中心',
     '/admin/users': '用户管理',

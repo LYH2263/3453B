@@ -131,6 +131,12 @@ const router = createRouter({
                     name: 'Partners',
                     component: () => import('../views/partners/index.vue'),
                     meta: { requiresAuth: true, roles: ['ADMIN', 'UNION_ADMIN', 'CLUB_LEADER'] }
+                },
+                {
+                    path: 'mentorship',
+                    name: 'Mentorship',
+                    component: () => import('../views/mentorship/index.vue'),
+                    meta: { requiresAuth: true }
                 }
             ]
         },

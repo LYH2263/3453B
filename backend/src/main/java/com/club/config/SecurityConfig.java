@@ -109,6 +109,17 @@ public class SecurityConfig {
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
                 .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/club-locations/*").hasAnyRole(
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                // 导师制模块：导师和时段的写操作仅社团负责人及以上
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/mentorship/mentors").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/mentorship/mentors").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/mentorship/mentors/*").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/mentorship/slots").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers("/api/mentorship/slots/*/cancel").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
                 // 其余接口需登录
                 .anyRequest().authenticated()
             )

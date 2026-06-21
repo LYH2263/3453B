@@ -716,3 +716,77 @@ INSERT INTO club_partners (id, club_id, partner_name, type, contact_name, contac
 (4, 2, '市文化艺术馆', 'SCHOOL_ORG', '陈馆长', '010-88888802', '2024-02-01', '2024-12-31', 'https://example.com/contract3.pdf', '联合举办艺术展览与公益演出', 'EXPIRED'),
 (5, 2, '星空传媒有限公司', 'ENTERPRISE', '刘总监', '13800138005', '2024-04-01', '2027-03-31', NULL, '文艺活动赞助与媒体宣传支持', 'ACTIVE'),
 (6, 2, '校学生艺术团', 'SCHOOL_ORG', '赵老师', '010-88888806', '2023-10-01', '2026-09-30', 'https://example.com/contract6.pdf', '艺术人才培养与节目合作', 'ACTIVE');
+
+-- 社团导师表
+CREATE TABLE IF NOT EXISTS club_mentors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    club_id INT NOT NULL COMMENT '所属社团ID',
+    name VARCHAR(50) NOT NULL COMMENT '导师姓名',
+    staff_no VARCHAR(50) DEFAULT NULL COMMENT '工号',
+    research_area VARCHAR(200) DEFAULT NULL COMMENT '研究方向',
+    intro TEXT COMMENT '导师简介',
+    user_id INT DEFAULT NULL COMMENT '关联用户ID(用于导师登录)',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (club_id) REFERENCES clubs(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    INDEX idx_club_id (club_id),
+    INDEX idx_user_id (user_id)
+) COMMENT='社团导师表';
+
+-- 导师时段表
+CREATE TABLE IF NOT EXISTS mentor_slots (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mentor_id INT NOT NULL COMMENT '导师ID',
+    start_time DATETIME NOT NULL COMMENT '开始时间',
+    end_time DATETIME NOT NULL COMMENT '结束时间',
+    status ENUM('AVAILABLE', 'BOOKED', 'CANCELLED') NOT NULL DEFAULT 'AVAILABLE' COMMENT '状态: 可用/已预约/已取消',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (mentor_id) REFERENCES club_mentors(id),
+    INDEX idx_mentor_id (mentor_id),
+    INDEX idx_status (status),
+    INDEX idx_time_range (start_time, end_time)
+) COMMENT='导师时段表';
+
+-- 导师预约表
+CREATE TABLE IF NOT EXISTS mentor_appointments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    slot_id INT NOT NULL COMMENT '时段ID',
+    student_id INT NOT NULL COMMENT '学生ID',
+    status ENUM('PENDING', 'CONFIRMED', 'REJECTED') NOT NULL DEFAULT 'PENDING' COMMENT '状态: 待确认/已确认/已拒绝',
+    reject_reason VARCHAR(500) DEFAULT NULL COMMENT '拒绝原因',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_slot_id (slot_id),
+    FOREIGN KEY (slot_id) REFERENCES mentor_slots(id),
+    FOREIGN KEY (student_id) REFERENCES users(id),
+    INDEX idx_student_id (student_id),
+    INDEX idx_status (status)
+) COMMENT='导师预约表';
+
+-- 导师测试数据
+INSERT INTO club_mentors (id, club_id, name, staff_no, research_area, intro, user_id) VALUES
+(1, 1, '张教授', 'T20210001', '嵌入式系统与物联网', '计算机学院副教授，研究方向为嵌入式系统与物联网应用，主持国家级项目3项。', 3),
+(2, 1, '李研究员', 'T20210002', '人工智能与机器学习', '中科院博士，专注深度学习与自然语言处理，发表SCI论文10余篇。', NULL),
+(3, 2, '王导师', 'T20210003', '声乐与音乐理论', '音乐学院讲师，主攻声乐表演与音乐理论，指导学生多次获省级奖项。', 4),
+(4, 2, '陈老师', 'T20210004', '舞蹈编导', '舞蹈系讲师，专攻中国民族民间舞与现代舞编导。', NULL);
+
+-- 导师时段测试数据
+INSERT INTO mentor_slots (id, mentor_id, start_time, end_time, status) VALUES
+(1, 1, '2024-07-01 09:00:00', '2024-07-01 10:00:00', 'BOOKED'),
+(2, 1, '2024-07-01 10:00:00', '2024-07-01 11:00:00', 'AVAILABLE'),
+(3, 1, '2024-07-02 14:00:00', '2024-07-02 15:00:00', 'AVAILABLE'),
+(4, 2, '2024-07-01 14:00:00', '2024-07-01 15:00:00', 'AVAILABLE'),
+(5, 2, '2024-07-03 09:00:00', '2024-07-03 10:00:00', 'AVAILABLE'),
+(6, 3, '2024-07-01 15:00:00', '2024-07-01 16:00:00', 'BOOKED'),
+(7, 3, '2024-07-02 10:00:00', '2024-07-02 11:00:00', 'AVAILABLE'),
+(8, 4, '2024-07-01 09:00:00', '2024-07-01 10:00:00', 'CANCELLED'),
+(9, 4, '2024-07-04 14:00:00', '2024-07-04 15:00:00', 'AVAILABLE');
+
+-- 导师预约测试数据
+INSERT INTO mentor_appointments (id, slot_id, student_id, status, reject_reason) VALUES
+(1, 1, 5, 'CONFIRMED', NULL),
+(2, 6, 6, 'PENDING', NULL);
