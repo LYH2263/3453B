@@ -297,3 +297,83 @@ INSERT INTO volunteer_stats (user_id, total_hours, approved_count, pending_count
 (5, 7.5, 2, 1, 0, '2024-04-01'),
 (6, 6.0, 1, 1, 0, '2024-04-10'),
 (8, 0.0, 0, 0, 1, '2024-03-10');
+
+-- 课程表
+CREATE TABLE IF NOT EXISTS courses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    club_id INT NOT NULL COMMENT '所属社团ID',
+    title VARCHAR(200) NOT NULL COMMENT '课程标题',
+    description TEXT COMMENT '课程简介',
+    cover VARCHAR(500) DEFAULT NULL COMMENT '课程封面',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (club_id) REFERENCES clubs(id),
+    INDEX idx_club_id (club_id)
+) COMMENT='课程表';
+
+-- 课程章节表
+CREATE TABLE IF NOT EXISTS course_chapters (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    course_id INT NOT NULL COMMENT '课程ID',
+    sort_order INT NOT NULL DEFAULT 0 COMMENT '章节序号',
+    title VARCHAR(200) NOT NULL COMMENT '章节标题',
+    content MEDIUMTEXT COMMENT '内容(Markdown/HTML)',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (course_id) REFERENCES courses(id),
+    INDEX idx_course_id (course_id),
+    INDEX idx_course_order (course_id, sort_order)
+) COMMENT='课程章节表';
+
+-- 章节进度表
+CREATE TABLE IF NOT EXISTS chapter_progress (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL COMMENT '用户ID',
+    chapter_id INT NOT NULL COMMENT '章节ID',
+    completed TINYINT(1) DEFAULT 0 COMMENT '是否完成',
+    complete_time DATETIME DEFAULT NULL COMMENT '完成时间',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_user_chapter (user_id, chapter_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (chapter_id) REFERENCES course_chapters(id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_chapter_id (chapter_id)
+) COMMENT='章节进度表';
+
+-- 课程测试数据
+INSERT INTO courses (id, club_id, title, description, cover) VALUES
+(1, 1, 'Arduino 入门到精通', '从零开始学习 Arduino 单片机开发，涵盖硬件基础、常用模块、项目实战。适合电子爱好者与编程初学者。', '/mock_images/media__1772178695205.png'),
+(2, 1, 'Python 数据分析实战', '使用 Python 进行数据清洗、可视化与机器学习入门，包含 NumPy、Pandas、Matplotlib 等常用库。', '/mock_images/media__1772178708344.png'),
+(3, 2, '声乐基础训练课', '从气息控制到发声技巧，系统化学习声乐基础知识，适合零基础音乐爱好者。', '/mock_images/media__1772178731457.png'),
+(4, 2, '水彩画入门教程', '讲解水彩画的材料、技法与创作流程，包含大量实操案例。', '/mock_images/media__1772178768576.png');
+
+-- 章节测试数据
+INSERT INTO course_chapters (course_id, sort_order, title, content) VALUES
+(1, 1, '第1章 Arduino 简介与硬件准备', '# Arduino 简介\n\nArduino 是一款开源的电子原型平台，易于学习和使用。\n\n## 所需材料\n- Arduino UNO 开发板\n- USB 数据线\n- 面包板与跳线\n- LED 若干\n\n## 安装 IDE\n1. 访问 [arduino.cc](https://www.arduino.cc/) 下载 IDE\n2. 安装驱动程序\n3. 连接开发板并选择端口'),
+(1, 2, '第2章 第一个程序 Blink', '# Blink 示例\n\n```cpp\nvoid setup() {\n  pinMode(LED_BUILTIN, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(LED_BUILTIN, HIGH);\n  delay(1000);\n  digitalWrite(LED_BUILTIN, LOW);\n  delay(1000);\n}\n```\n\n## 实验步骤\n1. 将代码复制到 IDE\n2. 选择正确的开发板和端口\n3. 点击上传按钮\n4. 观察 LED 闪烁'),
+(1, 3, '第3章 数字输入输出', '# 数字 I/O\n\n## pinMode 模式\n- INPUT：输入模式（高阻抗）\n- INPUT_PULLUP：输入上拉模式\n- OUTPUT：输出模式\n\n## 按键实验\n```cpp\nconst int btnPin = 2;\nconst int ledPin = 13;\n\nvoid setup() {\n  pinMode(btnPin, INPUT_PULLUP);\n  pinMode(ledPin, OUTPUT);\n}\n\nvoid loop() {\n  if (digitalRead(btnPin) == LOW) {\n    digitalWrite(ledPin, HIGH);\n  } else {\n    digitalWrite(ledPin, LOW);\n  }\n}'),
+(1, 4, '第4章 PWM 与模拟输出', '# PWM 模拟输出\n\nanalogWrite() 可产生 0-255 级的 PWM 信号，用于控制 LED 亮度、电机转速等。\n\n## 呼吸灯实验\n```cpp\nint brightness = 0;\nint fadeStep = 5;\n\nvoid setup() {\n  pinMode(9, OUTPUT);\n}\n\nvoid loop() {\n  analogWrite(9, brightness);\n  brightness += fadeStep;\n  if (brightness <= 0 || brightness >= 255) {\n    fadeStep = -fadeStep;\n  }\n  delay(30);\n}'),
+(1, 5, '第5章 综合项目：智能小车', '# 综合项目\n\n## 功能需求\n- 蓝牙遥控\n- 红外避障\n- 速度可调\n\n## 模块清单\n- L298N 电机驱动 x1\n- 直流减速电机 x4\n- 蓝牙模块 HC-05 x1\n- 红外传感器 x2\n\n## 电路连接\n详见课程附件 PDF 文档。'),
+(2, 1, '第1章 Python 环境准备', '# Python 安装\n\n推荐使用 Anaconda 发行版，内置数据科学所需的大部分库。\n\n## 创建虚拟环境\n```bash\nconda create -n data python=3.10\nconda activate data\n```\n\n## 安装依赖\n```bash\npip install numpy pandas matplotlib seaborn scikit-learn jupyter\n```'),
+(2, 2, '第2章 NumPy 基础', '# NumPy 数组操作\n\n```python\nimport numpy as np\n\n# 创建数组\na = np.array([1, 2, 3, 4, 5])\nb = np.arange(0, 10, 2)\n\n# 数学运算\nprint(np.mean(a))\nprint(np.std(a))\n\n# 矩阵运算\nA = np.array([[1, 2], [3, 4]])\nB = np.array([[5, 6], [7, 8]])\nprint(np.dot(A, B))\n```'),
+(2, 3, '第3章 Pandas 数据处理', '# Pandas 核心\n\n```python\nimport pandas as pd\n\n# 读取数据\ndf = pd.read_csv(\"data.csv\")\n\n# 数据探索\nprint(df.head())\nprint(df.describe())\nprint(df.info())\n\n# 数据清洗\ndf = df.dropna()  # 删除缺失值\ndf = df[df[\"age\"] > 0]  # 过滤异常值\n\n# 分组统计\nresult = df.groupby(\"category\")[\"sales\"].sum().reset_index()\n```'),
+(3, 1, '第1章 气息控制基础', '# 气息训练\n\n## 腹式呼吸\n1. 站立放松，双手置于腹部\n2. 用鼻子吸气，感受腹部向外扩张\n3. 保持 3 秒后用嘴缓慢呼气\n4. 重复 10 次为一组\n\n## 常见问题\n- 肩膀不要上抬\n- 吸气要深而饱满\n- 呼气要均匀平稳'),
+(3, 2, '第2章 发声位置与共鸣', '# 共鸣练习\n\n## 胸腔共鸣\n练习低音区发声，感受胸部震动。\n\n## 鼻腔共鸣\n哼唱 \"m\" 音，感受鼻腔震动。\n\n## 头腔共鸣\n发 \"i\" 母音，逐步升高音高。'),
+(4, 1, '第1章 水彩画材料介绍', '# 画材清单\n\n## 颜料\n- 固体水彩（推荐初学者）\n- 管装水彩（色彩浓郁）\n\n## 画笔\n- 圆头笔：细节刻画\n- 平头笔：大面积铺色\n- 斜头笔：边缘处理\n\n## 纸张\n- 粗纹：适合风景\n- 中纹：通用型\n- 细纹：适合人物与细节'),
+(4, 2, '第2章 基本技法练习', '# 三种基础技法\n\n## 1. 平涂法\n大面积均匀上色，注意水量控制。\n\n## 2. 渐变法\n湿画法过渡，一种颜色向另一种颜色自然融合。\n\n## 3. 叠色法\n干透后再上第二层色，用于增加层次感。');
+
+-- 进度测试数据
+INSERT INTO chapter_progress (user_id, chapter_id, completed, complete_time) VALUES
+(5, 1, 1, '2024-03-10 10:30:00'),
+(5, 2, 1, '2024-03-12 14:20:00'),
+(5, 3, 1, '2024-03-15 09:15:00'),
+(5, 4, 0, NULL),
+(5, 5, 0, NULL),
+(8, 1, 1, '2024-03-08 16:00:00'),
+(8, 2, 0, NULL),
+(6, 7, 1, '2024-03-18 11:00:00'),
+(6, 8, 1, '2024-03-20 15:30:00'),
+(6, 9, 0, NULL);

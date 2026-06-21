@@ -26,6 +26,10 @@
           <el-icon><Medal /></el-icon>
           <span>志愿服务</span>
         </el-menu-item>
+        <el-menu-item index="/courses">
+          <el-icon><Reading /></el-icon>
+          <span>培训课程</span>
+        </el-menu-item>
         <el-menu-item index="/profile">
           <el-icon><User /></el-icon>
           <span>个人中心</span>
@@ -125,6 +129,7 @@ const currentRouteName = computed(() => {
     '/activities': '活动中心',
     '/interaction': '互动社区',
     '/volunteer': '志愿服务',
+    '/courses': '培训课程',
     '/profile': '个人中心',
     '/admin/users': '用户管理',
     '/admin/dashboard': '管理看板',
@@ -132,6 +137,7 @@ const currentRouteName = computed(() => {
     '/admin/logs': '日志管理',
     '/admin/config': '基础配置'
   }
+  if (route.path.startsWith('/courses/')) return '课程详情'
   return map[route.path] || ''
 })
 

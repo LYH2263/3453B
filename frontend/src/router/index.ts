@@ -77,6 +77,24 @@ const router = createRouter({
                     name: 'Volunteer',
                     component: () => import('../views/volunteer/index.vue'),
                     meta: { requiresAuth: true }
+                },
+                {
+                    path: 'courses',
+                    name: 'Courses',
+                    component: () => import('../views/courses/index.vue'),
+                    meta: { requiresAuth: true }
+                },
+                {
+                    path: 'courses/:id',
+                    name: 'CourseDetail',
+                    component: () => import('../views/courses/CourseDetail.vue'),
+                    meta: { requiresAuth: true }
+                },
+                {
+                    path: 'courses/:courseId/chapter/:chapterId',
+                    name: 'ChapterLearn',
+                    component: () => import('../views/courses/ChapterLearn.vue'),
+                    meta: { requiresAuth: true }
                 }
             ]
         },
