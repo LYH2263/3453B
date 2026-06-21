@@ -685,3 +685,34 @@ INSERT INTO inspection_records (id, plan_id, result, remark, inspect_time, inspe
 (2, 2, 'NORMAL', '服务器温度正常，网络连接稳定', '2024-06-19 09:00:00', 5),
 (3, 4, 'NORMAL', '钢琴音准良好，外观无损坏', '2024-06-14 14:00:00', 6),
 (4, 5, 'ABNORMAL', '音响左声道有杂音，需要检修', '2024-05-20 16:00:00', 6);
+
+-- 合作伙伴台账表
+CREATE TABLE IF NOT EXISTS club_partners (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    club_id INT NOT NULL COMMENT '所属社团ID',
+    partner_name VARCHAR(200) NOT NULL COMMENT '合作伙伴名称',
+    type ENUM('ENTERPRISE', 'SCHOOL_ORG', 'OTHER') NOT NULL DEFAULT 'OTHER' COMMENT '类型: 企业/校组织/其他',
+    contact_name VARCHAR(50) DEFAULT NULL COMMENT '联系人姓名',
+    contact_phone VARCHAR(30) DEFAULT NULL COMMENT '联系电话',
+    contract_start DATE DEFAULT NULL COMMENT '合同开始日期',
+    contract_end DATE DEFAULT NULL COMMENT '合同结束日期',
+    contract_url VARCHAR(500) DEFAULT NULL COMMENT '合同附件URL',
+    remark VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    status ENUM('ACTIVE', 'EXPIRED') NOT NULL DEFAULT 'ACTIVE' COMMENT '状态: 合作中/已过期',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (club_id) REFERENCES clubs(id),
+    INDEX idx_club_id (club_id),
+    INDEX idx_status (status),
+    INDEX idx_contract_end (contract_end)
+) COMMENT='合作伙伴台账表';
+
+-- 合作伙伴测试数据
+INSERT INTO club_partners (id, club_id, partner_name, type, contact_name, contact_phone, contract_start, contract_end, contract_url, remark, status) VALUES
+(1, 1, '华为技术有限公司', 'ENTERPRISE', '王经理', '13800138001', '2024-01-01', '2026-12-31', 'https://example.com/contract1.pdf', '技术合作，提供实验设备与技术指导', 'ACTIVE'),
+(2, 1, '阿里云开发者社区', 'ENTERPRISE', '李主管', '13800138002', '2024-03-01', '2025-08-30', 'https://example.com/contract2.pdf', '云服务资源支持，联合举办技术比赛', 'ACTIVE'),
+(3, 1, '校电子信息学院', 'SCHOOL_ORG', '张教授', '010-88888801', '2023-09-01', '2025-07-15', NULL, '学术指导与实验室共享', 'ACTIVE'),
+(4, 2, '市文化艺术馆', 'SCHOOL_ORG', '陈馆长', '010-88888802', '2024-02-01', '2024-12-31', 'https://example.com/contract3.pdf', '联合举办艺术展览与公益演出', 'EXPIRED'),
+(5, 2, '星空传媒有限公司', 'ENTERPRISE', '刘总监', '13800138005', '2024-04-01', '2027-03-31', NULL, '文艺活动赞助与媒体宣传支持', 'ACTIVE'),
+(6, 2, '校学生艺术团', 'SCHOOL_ORG', '赵老师', '010-88888806', '2023-10-01', '2026-09-30', 'https://example.com/contract6.pdf', '艺术人才培养与节目合作', 'ACTIVE');

@@ -125,6 +125,12 @@ const router = createRouter({
                     name: 'CampusMap',
                     component: () => import('../views/campus-map/index.vue'),
                     meta: { requiresAuth: true }
+                },
+                {
+                    path: 'partners',
+                    name: 'Partners',
+                    component: () => import('../views/partners/index.vue'),
+                    meta: { requiresAuth: true, roles: ['ADMIN', 'UNION_ADMIN', 'CLUB_LEADER'] }
                 }
             ]
         },

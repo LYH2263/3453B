@@ -50,6 +50,13 @@
           <el-icon><MapLocation /></el-icon>
           <span>校园据点</span>
         </el-menu-item>
+        <!-- 社团负责人及以上可见 -->
+        <template v-if="isClubLeader">
+          <el-menu-item index="/partners">
+            <el-icon><Connection /></el-icon>
+            <span>合作伙伴</span>
+          </el-menu-item>
+        </template>
         <el-menu-item index="/profile">
           <el-icon><User /></el-icon>
           <span>个人中心</span>
@@ -155,6 +162,7 @@ const currentRouteName = computed(() => {
     '/points': '积分商城',
     '/inspections': '设备巡检',
     '/campus-map': '校园据点',
+    '/partners': '合作伙伴',
     '/profile': '个人中心',
     '/admin/users': '用户管理',
     '/admin/dashboard': '管理看板',
