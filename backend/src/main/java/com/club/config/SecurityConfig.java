@@ -67,6 +67,11 @@ public class SecurityConfig {
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
                 .requestMatchers("/api/volunteer/stats/summary", "/api/volunteer/records", "/api/volunteer/pending", "/api/volunteer/*/audit").hasAnyRole(
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                // 投票创建和关闭仅社团负责人
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/votes").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers("/api/votes/*/close").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
                 // 其余接口需登录
                 .anyRequest().authenticated()
             )

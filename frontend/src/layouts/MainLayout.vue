@@ -22,6 +22,10 @@
           <el-icon><ChatDotRound /></el-icon>
           <span>互动社区</span>
         </el-menu-item>
+        <el-menu-item index="/votes">
+          <el-icon><Checked /></el-icon>
+          <span>社团投票</span>
+        </el-menu-item>
         <el-menu-item index="/volunteer">
           <el-icon><Medal /></el-icon>
           <span>志愿服务</span>
@@ -128,6 +132,7 @@ const currentRouteName = computed(() => {
     '/clubs': '社团列表',
     '/activities': '活动中心',
     '/interaction': '互动社区',
+    '/votes': '社团投票',
     '/volunteer': '志愿服务',
     '/courses': '培训课程',
     '/profile': '个人中心',

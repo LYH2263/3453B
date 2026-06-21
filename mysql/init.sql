@@ -298,6 +298,52 @@ INSERT INTO volunteer_stats (user_id, total_hours, approved_count, pending_count
 (6, 6.0, 1, 1, 0, '2024-04-10'),
 (8, 0.0, 0, 0, 1, '2024-03-10');
 
+-- 投票表
+CREATE TABLE IF NOT EXISTS votes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    club_id INT NOT NULL COMMENT '社团ID',
+    title VARCHAR(200) NOT NULL COMMENT '投票标题',
+    type ENUM('SINGLE', 'MULTIPLE') NOT NULL DEFAULT 'SINGLE' COMMENT '投票类型: 单选/多选',
+    max_choices INT NOT NULL DEFAULT 1 COMMENT '多选时最多可选数',
+    deadline DATETIME NOT NULL COMMENT '截止时间',
+    status ENUM('OPEN', 'CLOSED') NOT NULL DEFAULT 'OPEN' COMMENT '状态',
+    creator_id INT NOT NULL COMMENT '创建人ID',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (club_id) REFERENCES clubs(id),
+    FOREIGN KEY (creator_id) REFERENCES users(id),
+    INDEX idx_club_id (club_id),
+    INDEX idx_status (status)
+) COMMENT='投票表';
+
+-- 投票选项表
+CREATE TABLE IF NOT EXISTS vote_options (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    vote_id INT NOT NULL COMMENT '投票ID',
+    option_text VARCHAR(500) NOT NULL COMMENT '选项文本',
+    vote_count INT NOT NULL DEFAULT 0 COMMENT '票数',
+    sort_order INT NOT NULL DEFAULT 0 COMMENT '排序',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    FOREIGN KEY (vote_id) REFERENCES votes(id),
+    INDEX idx_vote_id (vote_id)
+) COMMENT='投票选项表';
+
+-- 投票选票表
+CREATE TABLE IF NOT EXISTS vote_ballots (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    vote_id INT NOT NULL COMMENT '投票ID',
+    user_id INT NOT NULL COMMENT '投票用户ID',
+    option_id INT NOT NULL COMMENT '选项ID',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '投票时间',
+    UNIQUE KEY uk_vote_user_option (vote_id, user_id, option_id),
+    FOREIGN KEY (vote_id) REFERENCES votes(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (option_id) REFERENCES vote_options(id),
+    INDEX idx_vote_id (vote_id),
+    INDEX idx_user_id (user_id)
+) COMMENT='投票选票表';
+
 -- 课程表
 CREATE TABLE IF NOT EXISTS courses (
     id INT AUTO_INCREMENT PRIMARY KEY,

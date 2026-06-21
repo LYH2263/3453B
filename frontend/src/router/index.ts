@@ -41,6 +41,12 @@ const router = createRouter({
                     name: 'Interaction',
                     component: () => import('../views/Interaction.vue')
                 },
+                {
+                    path: 'votes',
+                    name: 'Votes',
+                    component: () => import('../views/Votes.vue'),
+                    meta: { requiresAuth: true }
+                },
                 // 管理员专属：用户管理
                 {
                     path: 'admin/dashboard',
