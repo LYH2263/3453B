@@ -604,3 +604,84 @@ INSERT INTO shop_items (name, description, image_url, cost_points, stock, club_i
 INSERT INTO redeem_orders (order_no, user_id, item_id, item_name, item_image, cost_points, quantity, status, remark) VALUES
 ('PO202403150001', 5, 1, '定制笔记本', '/mock_images/media__1772178695205.png', 50, 1, 'COMPLETED', NULL),
 ('PO202403200001', 5, 3, '极客社定制T恤', '/mock_images/media__17721787314576.png', 120, 1, 'PENDING', NULL);
+
+-- 设备表
+CREATE TABLE IF NOT EXISTS devices (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    club_id INT NOT NULL COMMENT '所属社团ID',
+    name VARCHAR(100) NOT NULL COMMENT '设备名称',
+    device_no VARCHAR(50) NOT NULL COMMENT '设备编号',
+    location VARCHAR(255) NOT NULL COMMENT '设备位置',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (club_id) REFERENCES clubs(id),
+    UNIQUE KEY uk_club_device_no (club_id, device_no),
+    INDEX idx_club_id (club_id)
+) COMMENT='设备表';
+
+-- 巡检计划表
+CREATE TABLE IF NOT EXISTS inspection_plans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    device_id INT NOT NULL COMMENT '设备ID',
+    cycle_days INT DEFAULT NULL COMMENT '巡检周期(天)，与cron二选一',
+    cron_expr VARCHAR(100) DEFAULT NULL COMMENT 'Cron表达式，与cycle_days二选一',
+    owner_id INT NOT NULL COMMENT '负责人ID(创建者/社团负责人)',
+    inspector_id INT NOT NULL COMMENT '巡检人ID',
+    last_inspect_time DATETIME DEFAULT NULL COMMENT '上次巡检时间',
+    next_inspect_date DATE DEFAULT NULL COMMENT '下次应检日期',
+    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE' COMMENT '状态: 启用/停用',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (device_id) REFERENCES devices(id),
+    FOREIGN KEY (owner_id) REFERENCES users(id),
+    FOREIGN KEY (inspector_id) REFERENCES users(id),
+    INDEX idx_device_id (device_id),
+    INDEX idx_inspector_id (inspector_id),
+    INDEX idx_next_date (next_inspect_date),
+    INDEX idx_status (status)
+) COMMENT='巡检计划表';
+
+-- 巡检记录表
+CREATE TABLE IF NOT EXISTS inspection_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    plan_id INT NOT NULL COMMENT '巡检计划ID',
+    result ENUM('NORMAL', 'ABNORMAL') NOT NULL COMMENT '巡检结果: 正常/异常',
+    remark TEXT COMMENT '巡检备注',
+    inspect_time DATETIME NOT NULL COMMENT '实际巡检时间',
+    inspector_id INT NOT NULL COMMENT '实际巡检人ID',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (plan_id) REFERENCES inspection_plans(id),
+    FOREIGN KEY (inspector_id) REFERENCES users(id),
+    INDEX idx_plan_id (plan_id),
+    INDEX idx_inspector_id (inspector_id),
+    INDEX idx_inspect_time (inspect_time),
+    INDEX idx_result (result)
+) COMMENT='巡检记录表';
+
+-- 设备测试数据
+INSERT INTO devices (id, club_id, name, device_no, location) VALUES
+(1, 1, '投影仪A', 'DEV-PROJ-001', '科技楼102教室'),
+(2, 1, '服务器机柜', 'DEV-SRV-001', '社团服务器机房'),
+(3, 1, '智能小车实验平台', 'DEV-ROBOT-001', '科技楼305实验室'),
+(4, 2, '钢琴', 'DEV-PIANO-001', '艺术楼201琴房'),
+(5, 2, '音响设备套装', 'DEV-AUDIO-001', '艺术楼102排练厅'),
+(6, 2, '舞蹈教室音响', 'DEV-AUDIO-002', '艺术楼302舞蹈厅');
+
+-- 巡检计划测试数据
+INSERT INTO inspection_plans (id, device_id, cycle_days, cron_expr, owner_id, inspector_id, last_inspect_time, next_inspect_date, status) VALUES
+(1, 1, 7, NULL, 3, 5, '2024-03-15 10:00:00', '2024-06-18', 'ACTIVE'),
+(2, 2, 3, NULL, 3, 5, '2024-06-19 09:00:00', '2024-06-22', 'ACTIVE'),
+(3, 3, 14, NULL, 3, 6, NULL, '2024-06-21', 'ACTIVE'),
+(4, 4, 7, NULL, 4, 6, '2024-06-14 14:00:00', '2024-06-21', 'ACTIVE'),
+(5, 5, 30, NULL, 4, 6, '2024-05-20 16:00:00', '2024-06-19', 'ACTIVE'),
+(6, 6, 10, NULL, 4, 5, NULL, '2024-06-25', 'ACTIVE');
+
+-- 巡检记录测试数据
+INSERT INTO inspection_records (id, plan_id, result, remark, inspect_time, inspector_id) VALUES
+(1, 1, 'NORMAL', '投影仪工作正常，镜头清洁完毕', '2024-03-15 10:00:00', 5),
+(2, 2, 'NORMAL', '服务器温度正常，网络连接稳定', '2024-06-19 09:00:00', 5),
+(3, 4, 'NORMAL', '钢琴音准良好，外观无损坏', '2024-06-14 14:00:00', 6),
+(4, 5, 'ABNORMAL', '音响左声道有杂音，需要检修', '2024-05-20 16:00:00', 6);

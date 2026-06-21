@@ -113,6 +113,12 @@ const router = createRouter({
                     name: 'Points',
                     component: () => import('../views/points/index.vue'),
                     meta: { requiresAuth: true }
+                },
+                {
+                    path: 'inspections',
+                    name: 'Inspections',
+                    component: () => import('../views/inspections/index.vue'),
+                    meta: { requiresAuth: true }
                 }
             ]
         },

@@ -42,6 +42,10 @@
           <el-icon><ShoppingCart /></el-icon>
           <span>积分商城</span>
         </el-menu-item>
+        <el-menu-item index="/inspections">
+          <el-icon><Monitor /></el-icon>
+          <span>设备巡检</span>
+        </el-menu-item>
         <el-menu-item index="/profile">
           <el-icon><User /></el-icon>
           <span>个人中心</span>
@@ -145,6 +149,7 @@ const currentRouteName = computed(() => {
     '/courses': '培训课程',
     '/venues': '场地预约',
     '/points': '积分商城',
+    '/inspections': '设备巡检',
     '/profile': '个人中心',
     '/admin/users': '用户管理',
     '/admin/dashboard': '管理看板',

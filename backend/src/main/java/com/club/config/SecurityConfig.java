@@ -89,6 +89,19 @@ public class SecurityConfig {
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
                 .requestMatchers("/api/venues/bookings/all").hasAnyRole(
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
+                // 设备巡检模块：设备和计划管理仅社团负责人及以上
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/inspections/devices").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/inspections/devices").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/inspections/devices/*").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/inspections/plans").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/inspections/plans").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/inspections/plans/*").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
                 // 其余接口需登录
                 .anyRequest().authenticated()
             )
