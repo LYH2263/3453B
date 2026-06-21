@@ -174,6 +174,45 @@ CREATE TABLE IF NOT EXISTS answers (
     FOREIGN KEY (author_id) REFERENCES users(id)
 ) COMMENT='回答表';
 
+-- 志愿服务记录表
+CREATE TABLE IF NOT EXISTS volunteer_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL COMMENT '学生ID',
+    activity_name VARCHAR(200) NOT NULL COMMENT '活动名称',
+    service_date DATE NOT NULL COMMENT '服务日期',
+    hours DECIMAL(5,2) NOT NULL COMMENT '时长小时数',
+    proof_url VARCHAR(500) DEFAULT NULL COMMENT '证明URL',
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING' COMMENT '状态',
+    auditor_id INT DEFAULT NULL COMMENT '审核人ID',
+    club_id INT DEFAULT NULL COMMENT '所属社团ID',
+    reject_reason VARCHAR(500) DEFAULT NULL COMMENT '驳回原因',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (student_id) REFERENCES users(id),
+    FOREIGN KEY (auditor_id) REFERENCES users(id),
+    FOREIGN KEY (club_id) REFERENCES clubs(id),
+    INDEX idx_student_id (student_id),
+    INDEX idx_club_id (club_id),
+    INDEX idx_status (status),
+    INDEX idx_service_date (service_date)
+) COMMENT='志愿服务记录表';
+
+-- 志愿服务统计表
+CREATE TABLE IF NOT EXISTS volunteer_stats (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL COMMENT '用户ID',
+    total_hours DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '累计服务时长',
+    approved_count INT NOT NULL DEFAULT 0 COMMENT '已通过记录数',
+    pending_count INT NOT NULL DEFAULT 0 COMMENT '待审核记录数',
+    rejected_count INT NOT NULL DEFAULT 0 COMMENT '已驳回记录数',
+    last_service_date DATE DEFAULT NULL COMMENT '最近服务日期',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_user_id (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) COMMENT='志愿服务统计表';
+
 -- ----------------------------
 -- Mock Data (测试数据)
 -- ----------------------------
@@ -243,3 +282,18 @@ INSERT INTO questions (id, title, content, author_id, target_club_id, target_rol
 INSERT INTO answers (question_id, author_id, content, is_best) VALUES
 (1, 1, '系统账号需通过学生证号注册，后台审核后即可登录。', 1),
 (2, 2, '报销流程需先在社管系统提交申请，附上电子发票，张老师审核后通过。', 0);
+
+-- 志愿服务记录测试数据
+INSERT INTO volunteer_records (student_id, activity_name, service_date, hours, proof_url, status, auditor_id, club_id, reject_reason) VALUES
+(5, '校园图书馆整理', '2024-03-15', 4.0, 'https://example.com/proof1.jpg', 'APPROVED', 3, 1, NULL),
+(5, '社区敬老院慰问', '2024-03-22', 3.5, 'https://example.com/proof2.jpg', 'APPROVED', 3, 1, NULL),
+(5, '校园清洁日活动', '2024-04-01', 2.0, 'https://example.com/proof3.jpg', 'PENDING', NULL, 2, NULL),
+(6, '新生报到志愿服务', '2024-02-28', 6.0, 'https://example.com/proof4.jpg', 'APPROVED', 4, 2, NULL),
+(6, '春季运动会志愿者', '2024-04-10', 8.0, 'https://example.com/proof5.jpg', 'PENDING', NULL, 2, NULL),
+(8, '图书馆志愿服务', '2024-03-10', 3.0, 'https://example.com/proof6.jpg', 'REJECTED', 3, 1, '证明材料不清晰，请重新上传');
+
+-- 志愿服务统计测试数据
+INSERT INTO volunteer_stats (user_id, total_hours, approved_count, pending_count, rejected_count, last_service_date) VALUES
+(5, 7.5, 2, 1, 0, '2024-04-01'),
+(6, 6.0, 1, 1, 0, '2024-04-10'),
+(8, 0.0, 0, 0, 1, '2024-03-10');

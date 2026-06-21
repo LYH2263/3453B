@@ -60,6 +60,13 @@ public class SecurityConfig {
                 // 活动审核仅社联/管理员
                 .requestMatchers("/api/activities/*/audit").hasAnyRole(
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
+                // 志愿服务接口权限
+                .requestMatchers("/api/volunteer/export/**").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                .requestMatchers("/api/volunteer/stats/ranking", "/api/volunteer/stats/user/*").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
+                .requestMatchers("/api/volunteer/stats/summary", "/api/volunteer/records", "/api/volunteer/pending", "/api/volunteer/*/audit").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
                 // 其余接口需登录
                 .anyRequest().authenticated()
             )
