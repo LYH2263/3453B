@@ -72,6 +72,23 @@ public class SecurityConfig {
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
                 .requestMatchers("/api/votes/*/close").hasAnyRole(
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                // 场地管理仅管理员
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/venues").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
+                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/venues").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/venues/*").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
+                // 场地预约仅社团负责人
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/venues/bookings").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
+                // 场地审批仅管理员
+                .requestMatchers("/api/venues/bookings/*/audit").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
+                .requestMatchers("/api/venues/bookings/pending").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
+                .requestMatchers("/api/venues/bookings/all").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
                 // 其余接口需登录
                 .anyRequest().authenticated()
             )

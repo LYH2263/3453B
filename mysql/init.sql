@@ -423,3 +423,57 @@ INSERT INTO chapter_progress (user_id, chapter_id, completed, complete_time) VAL
 (6, 7, 1, '2024-03-18 11:00:00'),
 (6, 8, 1, '2024-03-20 15:30:00'),
 (6, 9, 0, NULL);
+
+-- 场地表
+CREATE TABLE IF NOT EXISTS venues (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL COMMENT '场地名称',
+    capacity INT NOT NULL DEFAULT 50 COMMENT '容纳人数',
+    location VARCHAR(255) NOT NULL COMMENT '位置描述',
+    status ENUM('AVAILABLE', 'UNAVAILABLE') NOT NULL DEFAULT 'AVAILABLE' COMMENT '状态: 可用/不可用',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    INDEX idx_status (status)
+) COMMENT='场地表';
+
+-- 场地预约表
+CREATE TABLE IF NOT EXISTS venue_bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    venue_id INT NOT NULL COMMENT '场地ID',
+    club_id INT NOT NULL COMMENT '社团ID',
+    start_time DATETIME NOT NULL COMMENT '开始时间',
+    end_time DATETIME NOT NULL COMMENT '结束时间',
+    purpose VARCHAR(500) NOT NULL COMMENT '使用目的',
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING' COMMENT '状态: 待审批/已通过/已驳回',
+    applicant_id INT NOT NULL COMMENT '申请人ID',
+    auditor_id INT DEFAULT NULL COMMENT '审批人ID',
+    reject_reason VARCHAR(500) DEFAULT NULL COMMENT '驳回原因',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
+    FOREIGN KEY (venue_id) REFERENCES venues(id),
+    FOREIGN KEY (club_id) REFERENCES clubs(id),
+    FOREIGN KEY (applicant_id) REFERENCES users(id),
+    FOREIGN KEY (auditor_id) REFERENCES users(id),
+    INDEX idx_venue_id (venue_id),
+    INDEX idx_club_id (club_id),
+    INDEX idx_status (status),
+    INDEX idx_time_range (start_time, end_time)
+) COMMENT='场地预约表';
+
+-- 场地测试数据
+INSERT INTO venues (id, name, capacity, location, status) VALUES
+(1, '大礼堂', 500, '学校东区综合楼1层', 'AVAILABLE'),
+(2, '多功能报告厅', 200, '科技楼2层201', 'AVAILABLE'),
+(3, '舞蹈排练厅', 50, '艺术楼3层302', 'AVAILABLE'),
+(4, '会议室A', 30, '行政楼4层401', 'AVAILABLE'),
+(5, '会议室B', 20, '行政楼4层402', 'AVAILABLE'),
+(6, '室外篮球场', 100, '体育中心西侧', 'AVAILABLE');
+
+-- 场地预约测试数据
+INSERT INTO venue_bookings (venue_id, club_id, start_time, end_time, purpose, status, applicant_id, auditor_id, reject_reason) VALUES
+(1, 1, '2024-05-20 14:00:00', '2024-05-20 18:00:00', '编程大赛决赛', 'APPROVED', 3, 1, NULL),
+(2, 2, '2024-05-21 09:00:00', '2024-05-21 12:00:00', '声乐公开课', 'APPROVED', 4, 1, NULL),
+(3, 2, '2024-05-22 15:00:00', '2024-05-22 18:00:00', '舞蹈队训练', 'PENDING', 4, NULL, NULL),
+(4, 1, '2024-05-23 10:00:00', '2024-05-23 12:00:00', '社团例会', 'REJECTED', 3, 2, '该时段已有其他社团预约');
