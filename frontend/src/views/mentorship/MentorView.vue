@@ -49,7 +49,7 @@
                   <template #default="{ row }">{{ formatDateTime(row.endTime) }}</template>
                 </el-table-column>
                 <el-table-column prop="status" label="状态" width="100" align="center">
-                  <template #default="{ row }">
+                  <template #default>
                     <el-tag type="warning">待处理</el-tag>
                   </template>
                 </el-table-column>
@@ -170,9 +170,6 @@ const loadAppointments = async () => {
   try {
     const data = await mentorshipApi.getPendingByMentor(myMentorId.value)
     pendingAppointments.value = data as unknown as MentorAppointment[]
-
-    const allSlots = await mentorshipApi.getSlotsByMentor(myMentorId.value)
-    const slotIds = (allSlots as unknown as any[]).map((s: any) => s.id)
     allAppointments.value = pendingAppointments.value
   } catch (err) {
     console.error('Failed to load appointments:', err)

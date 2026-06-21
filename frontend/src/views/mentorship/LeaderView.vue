@@ -128,7 +128,7 @@
                   <template #default="{ row }">{{ formatDateTime(row.endTime) }}</template>
                 </el-table-column>
                 <el-table-column prop="status" label="状态" width="100" align="center">
-                  <template #default="{ row }">
+                  <template #default>
                     <el-tag type="warning">待处理</el-tag>
                   </template>
                 </el-table-column>
@@ -277,13 +277,7 @@ const availableSlotCount = computed(() => {
 
 const totalPendingCount = computed(() => pendingAppointments.value.length)
 
-const totalConfirmedCount = computed(() => {
-  let count = 0
-  for (const m of mentors.value) {
-    count += 1
-  }
-  return count
-})
+const totalConfirmedCount = computed(() => mentors.value.length)
 
 const loadMentors = async () => {
   mentorLoading.value = true

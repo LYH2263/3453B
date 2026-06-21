@@ -198,7 +198,7 @@ import { ref, computed, onMounted, reactive, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
-  ArrowLeft, ArrowRight, Picture, OfficeBuilding, DataLine, VideoPlay,
+  ArrowLeft, Picture, OfficeBuilding, DataLine, VideoPlay,
   CircleCheck, List, Plus, Lock, View, Edit, Delete
 } from '@element-plus/icons-vue'
 import courseApi, { type Course, type CourseChapter } from '../../api/courses'

@@ -160,8 +160,8 @@ import volunteerApi, {
   type VolunteerRecord,
   type VolunteerStat,
   type VolunteerSubmitRequest
-} from '../api/volunteer'
-import request from '../utils/request'
+} from '../../api/volunteer'
+import request from '../../utils/request'
 
 const loading = ref(false)
 const myRecords = ref<VolunteerRecord[]>([])

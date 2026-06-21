@@ -237,8 +237,8 @@ import partnerApi, {
   type PartnerUpdateRequest,
   type PartnerQueryParams,
   type PartnerStats
-} from '../api/partners'
-import { useUserStore } from '../store/user'
+} from '../../api/partners'
+import { useUserStore } from '../../store/user'
 
 const userStore = useUserStore()
 const loading = ref(false)
@@ -258,7 +258,8 @@ const queryParams = reactive<PartnerQueryParams>({
   keyword: ''
 })
 
-const form = reactive<PartnerCreateRequest & PartnerUpdateRequest>({
+const form = reactive<PartnerUpdateRequest & { clubId?: number; partnerName: string; type: Partner['type'] }>({
+  clubId: userStore.userInfo?.clubId,
   partnerName: '',
   type: 'ENTERPRISE',
   contactName: '',

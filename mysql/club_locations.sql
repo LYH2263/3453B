@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS club_locations (
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     is_deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除',
-    FOREIGN KEY (club_id) REFERENCES clubs(id) ON DELETE SET NULL,
+    FOREIGN KEY (club_id) REFERENCES clubs(id) ON DELETE CASCADE,
     INDEX idx_club_id (club_id),
     INDEX idx_building (building)
 ) COMMENT='社团线下据点表';

@@ -1,6 +1,7 @@
 package com.club.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -172,7 +173,7 @@ public class PointServiceImpl extends ServiceImpl<ShopItemMapper, ShopItem> impl
         }
 
         int updatedRows = baseMapper.update(null,
-                new LambdaQueryWrapper<ShopItem>()
+                new LambdaUpdateWrapper<ShopItem>()
                         .eq(ShopItem::getId, item.getId())
                         .ge(ShopItem::getStock, request.getQuantity())
                         .setSql("stock = stock - " + request.getQuantity()));
@@ -193,7 +194,7 @@ public class PointServiceImpl extends ServiceImpl<ShopItemMapper, ShopItem> impl
         }
 
         pointsUpdatedRows = userPointsMapper.update(null,
-                new LambdaQueryWrapper<UserPoints>()
+                new LambdaUpdateWrapper<UserPoints>()
                         .eq(UserPoints::getUserId, user.getId())
                         .ge(UserPoints::getBalance, totalCost)
                         .setSql("balance = balance - " + totalCost)
@@ -201,7 +202,7 @@ public class PointServiceImpl extends ServiceImpl<ShopItemMapper, ShopItem> impl
 
         if (pointsUpdatedRows == 0) {
             baseMapper.update(null,
-                    new LambdaQueryWrapper<ShopItem>()
+                    new LambdaUpdateWrapper<ShopItem>()
                             .eq(ShopItem::getId, item.getId())
                             .setSql("stock = stock + " + request.getQuantity()));
             return Result.error("积分不足，请稍后重试");
@@ -360,7 +361,7 @@ public class PointServiceImpl extends ServiceImpl<ShopItemMapper, ShopItem> impl
         }
 
         this.removeById(id);
-        return Result.success();
+        return Result.success(null);
     }
 
     @Override
@@ -481,13 +482,13 @@ public class PointServiceImpl extends ServiceImpl<ShopItemMapper, ShopItem> impl
             ShopItem item = this.getById(order.getItemId());
             if (item != null) {
                 baseMapper.update(null,
-                        new LambdaQueryWrapper<ShopItem>()
+                        new LambdaUpdateWrapper<ShopItem>()
                                 .eq(ShopItem::getId, item.getId())
                                 .setSql("stock = stock + " + order.getQuantity()));
             }
 
             userPointsMapper.update(null,
-                    new LambdaQueryWrapper<UserPoints>()
+                    new LambdaUpdateWrapper<UserPoints>()
                             .eq(UserPoints::getUserId, order.getUserId())
                             .setSql("balance = balance + " + order.getCostPoints())
                             .setSql("total_spent = total_spent - " + order.getCostPoints()));
@@ -538,7 +539,7 @@ public class PointServiceImpl extends ServiceImpl<ShopItemMapper, ShopItem> impl
         } else {
             if (request.getPoints() > 0) {
                 userPointsMapper.update(null,
-                        new LambdaQueryWrapper<UserPoints>()
+                        new LambdaUpdateWrapper<UserPoints>()
                                 .eq(UserPoints::getUserId, request.getUserId())
                                 .setSql("balance = balance + " + request.getPoints())
                                 .setSql("total_earned = total_earned + " + request.getPoints()));
@@ -547,7 +548,7 @@ public class PointServiceImpl extends ServiceImpl<ShopItemMapper, ShopItem> impl
                     return Result.error("积分不足");
                 }
                 userPointsMapper.update(null,
-                        new LambdaQueryWrapper<UserPoints>()
+                        new LambdaUpdateWrapper<UserPoints>()
                                 .eq(UserPoints::getUserId, request.getUserId())
                                 .ge(UserPoints::getBalance, -request.getPoints())
                                 .setSql("balance = balance + " + request.getPoints())

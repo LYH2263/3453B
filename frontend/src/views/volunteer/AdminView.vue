@@ -74,7 +74,7 @@
       <el-col :span="6">
         <div class="stat-card glass-card hover-lift">
           <div class="stat-icon success">
-            <el-icon><CheckCircle /></el-icon>
+            <el-icon><CircleCheck /></el-icon>
           </div>
           <div class="stat-content">
             <div class="stat-label">已通过</div>
@@ -207,14 +207,14 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import * as echarts from 'echarts'
-import { Download, Document, Search, DocumentCopy, CheckCircle, Clock, User } from '@element-plus/icons-vue'
+import { Download, Document, Search, DocumentCopy, CircleCheck, Clock, User } from '@element-plus/icons-vue'
 import volunteerApi, {
   type VolunteerStatsSummary,
   type VolunteerStat,
   type VolunteerRecord,
   type QueryParams
-} from '../api/volunteer'
-import request from '../utils/request'
+} from '../../api/volunteer'
+import request from '../../utils/request'
 
 const loading = ref(false)
 const recordsLoading = ref(false)

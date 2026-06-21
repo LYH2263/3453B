@@ -136,9 +136,9 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElForm } from 'element-plus'
 import { Refresh, View, Check, Close } from '@element-plus/icons-vue'
-import volunteerApi, { type VolunteerRecord, type VolunteerAuditRequest } from '../api/volunteer'
-import { useUserStore } from '../store/user'
-import request from '../utils/request'
+import volunteerApi, { type VolunteerRecord, type VolunteerAuditRequest } from '../../api/volunteer'
+import { useUserStore } from '../../store/user'
+import request from '../../utils/request'
 
 const userStore = useUserStore()
 const loading = ref(false)

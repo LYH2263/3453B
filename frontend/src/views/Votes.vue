@@ -52,7 +52,7 @@
           <el-date-picker v-model="createForm.deadline" type="datetime" placeholder="选择截止时间" style="width:100%" />
         </el-form-item>
         <el-form-item label="投票选项" required>
-          <div v-for="(opt, idx) in createForm.options" :key="idx" style="display:flex; gap:10px; margin-bottom:8px;">
+          <div v-for="(_, idx) in createForm.options" :key="idx" style="display:flex; gap:10px; margin-bottom:8px;">
             <el-input v-model="createForm.options[idx]" :placeholder="`选项 ${idx + 1}`" />
             <el-button v-if="createForm.options.length > 2" type="danger" plain @click="removeOption(idx)">删除</el-button>
           </div>
