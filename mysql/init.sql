@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS activities (
     process TEXT COMMENT '活动流程',
     status ENUM('PENDING_UNION', 'PENDING_SCHOOL', 'APPROVED', 'REJECTED', 'FINISHED') NOT NULL DEFAULT 'PENDING_UNION' COMMENT '状态',
     reject_reason VARCHAR(255) DEFAULT NULL COMMENT '审核驳回原因',
+    is_mandatory TINYINT(1) DEFAULT 0 COMMENT '是否强制参加',
     poster VARCHAR(255) DEFAULT NULL COMMENT '活动海报',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -59,7 +60,7 @@ CREATE TABLE IF NOT EXISTS activity_registrations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     activity_id INT NOT NULL COMMENT '活动ID',
     user_id INT NOT NULL COMMENT '用户ID',
-    status ENUM('REGISTERED', 'SIGNED_IN') NOT NULL DEFAULT 'REGISTERED' COMMENT '报名状态',
+    status ENUM('REGISTERED', 'SIGNED_IN', 'EXEMPTED') NOT NULL DEFAULT 'REGISTERED' COMMENT '报名状态',
     rating INT DEFAULT NULL COMMENT '评分(1-5)',
     feedback TEXT DEFAULT NULL COMMENT '反馈内容',
     reply TEXT DEFAULT NULL COMMENT '负责人回复',
@@ -790,3 +791,26 @@ INSERT INTO mentor_slots (id, mentor_id, start_time, end_time, status) VALUES
 INSERT INTO mentor_appointments (id, slot_id, student_id, status, reject_reason) VALUES
 (1, 1, 5, 'CONFIRMED', NULL),
 (2, 6, 6, 'PENDING', NULL);
+
+-- 活动请假申请表
+CREATE TABLE IF NOT EXISTS activity_leave_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    activity_id INT NOT NULL COMMENT '活动ID',
+    user_id INT NOT NULL COMMENT '申请人ID',
+    reason TEXT NOT NULL COMMENT '请假原因',
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING' COMMENT '状态',
+    approver_id INT DEFAULT NULL COMMENT '审批人ID',
+    club_id INT NOT NULL COMMENT '所属社团ID',
+    reject_reason VARCHAR(500) DEFAULT NULL COMMENT '驳回原因',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_user_activity (user_id, activity_id),
+    FOREIGN KEY (activity_id) REFERENCES activities(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (approver_id) REFERENCES users(id),
+    FOREIGN KEY (club_id) REFERENCES clubs(id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_activity_id (activity_id),
+    INDEX idx_club_id (club_id),
+    INDEX idx_status (status)
+) COMMENT='活动请假申请表';

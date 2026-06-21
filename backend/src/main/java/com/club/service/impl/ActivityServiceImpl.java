@@ -6,6 +6,7 @@ import com.club.common.Result;
 import com.club.entity.*;
 import com.club.mapper.*;
 import com.club.service.ActivityService;
+import com.club.service.LeaveRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,8 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
     private RegistrationMapper registrationMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private LeaveRequestService leaveRequestService;
 
     @Override
     public Result<?> createActivity(Activity activity) {
@@ -93,10 +96,15 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
 
     @Override
     public Result<?> signin(Integer activityId, Integer userId) {
+        if (leaveRequestService.isUserExempted(activityId, userId)) {
+            return Result.error("该用户已获请假批准，无需签到");
+        }
+
         ActivityRegistration reg = registrationMapper.selectOne(new LambdaQueryWrapper<ActivityRegistration>()
                 .eq(ActivityRegistration::getActivityId, activityId)
                 .eq(ActivityRegistration::getUserId, userId));
         if (reg == null) return Result.error("未报名该活动");
+        if ("EXEMPTED".equals(reg.getStatus())) return Result.error("该用户已豁免，无需签到");
         reg.setStatus("SIGNED_IN");
         registrationMapper.updateById(reg);
         return Result.success(null);

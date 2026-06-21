@@ -26,6 +26,7 @@ public class Activity {
     private String rejectReason;
     private String process;
     private String poster;
+    private Boolean isMandatory;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
@@ -72,6 +73,9 @@ public class Activity {
 
     public String getPoster() { return poster; }
     public void setPoster(String poster) { this.poster = poster; }
+
+    public Boolean getIsMandatory() { return isMandatory; }
+    public void setIsMandatory(Boolean isMandatory) { this.isMandatory = isMandatory; }
 
     public LocalDateTime getCreateTime() { return createTime; }
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }

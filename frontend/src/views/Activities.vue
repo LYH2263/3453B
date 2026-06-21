@@ -12,7 +12,10 @@
           </div>
           <div class="card-header">
             <h3>{{ act.title }}</h3>
-            <el-tag :type="statusType(act.status)">{{ statusText(act.status) }}</el-tag>
+            <div>
+              <el-tag v-if="act.isMandatory" type="danger" size="small" style="margin-right:6px">强制</el-tag>
+              <el-tag :type="statusType(act.status)">{{ statusText(act.status) }}</el-tag>
+            </div>
           </div>
           <div class="card-body">
             <p class="desc">{{ act.description }}</p>
@@ -22,6 +25,7 @@
             </div>
             <div class="actions">
               <el-button type="primary" size="small" @click="handleRegister(act)">立即报名</el-button>
+              <el-button v-if="act.isMandatory && act.status === 'APPROVED'" type="warning" size="small" @click="handleLeave(act)">请假</el-button>
               <el-button v-if="canAudit(act)" type="warning" size="small" @click="handleAudit(act)">审核</el-button>
               <el-button v-if="act.status === 'APPROVED' && userStore.role === 'CLUB_LEADER'" type="success" size="small" @click="handleFinish(act.id)">结束活动</el-button>
             </div>
@@ -57,6 +61,9 @@
         <el-form-item label="预算">
           <el-input-number v-model="addForm.budget" :min="0" />
         </el-form-item>
+        <el-form-item label="强制参加">
+          <el-switch v-model="addForm.isMandatory" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showAddDialog = false">取消</el-button>
@@ -82,6 +89,22 @@
         <el-button type="primary" @click="submitAudit">确认</el-button>
       </template>
     </el-dialog>
+
+    <!-- 请假弹窗 -->
+    <el-dialog v-model="showLeaveDialog" title="活动请假" width="450px">
+      <el-form :model="leaveForm" label-width="80px">
+        <el-form-item label="活动名称">
+          <span>{{ currentLeaveActivity?.title }}</span>
+        </el-form-item>
+        <el-form-item label="请假原因" required>
+          <el-input v-model="leaveForm.reason" type="textarea" :rows="4" placeholder="请详细说明请假原因" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showLeaveDialog = false">取消</el-button>
+        <el-button type="primary" @click="submitLeave">提交请假</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -100,6 +123,7 @@ interface Activity {
   startTime: string
   status: string
   poster?: string
+  isMandatory?: boolean
 }
 
 const userStore = useUserStore()
@@ -143,7 +167,7 @@ const handleRegister = async (act: any) => {
   }
 }
 
-const addForm = ref({ title: '', description: '', process: '', location: '', startTime: '', endTime: '', maxCount: 50, budget: 0 })
+const addForm = ref({ title: '', description: '', process: '', location: '', startTime: '', endTime: '', maxCount: 50, budget: 0, isMandatory: false })
 
 const submitAdd = async () => {
   try {
@@ -184,6 +208,33 @@ const handleFinish = async (id: number) => {
     fetchActivities()
   } catch (err) {
     console.error('Finish activity failed:', err)
+  }
+}
+
+const showLeaveDialog = ref(false)
+const currentLeaveActivity = ref<Activity | null>(null)
+const leaveForm = ref({ reason: '' })
+
+const handleLeave = (act: Activity) => {
+  currentLeaveActivity.value = act
+  leaveForm.value = { reason: '' }
+  showLeaveDialog.value = true
+}
+
+const submitLeave = async () => {
+  if (!leaveForm.value.reason.trim()) {
+    ElMessage.warning('请填写请假原因')
+    return
+  }
+  try {
+    await request.post('/leave-requests', {
+      activityId: currentLeaveActivity.value?.id,
+      reason: leaveForm.value.reason
+    })
+    ElMessage.success('请假申请已提交')
+    showLeaveDialog.value = false
+  } catch (err) {
+    console.error('Leave request failed:', err)
   }
 }
 

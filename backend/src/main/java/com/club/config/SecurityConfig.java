@@ -60,6 +60,12 @@ public class SecurityConfig {
                 // 活动审核仅社联/管理员
                 .requestMatchers("/api/activities/*/audit").hasAnyRole(
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN)
+                // 活动请假：提交和查看自己的请假任何登录用户可访问
+                .requestMatchers("/api/leave-requests", "/api/leave-requests/my").authenticated()
+                // 活动请假审批：社团负责人及以上
+                .requestMatchers("/api/leave-requests/pending", "/api/leave-requests/all",
+                    "/api/leave-requests/*/approve", "/api/leave-requests/*/reject").hasAnyRole(
+                    RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)
                 // 志愿服务接口权限
                 .requestMatchers("/api/volunteer/export/**").hasAnyRole(
                     RoleConstants.ADMIN, RoleConstants.UNION_ADMIN, RoleConstants.CLUB_LEADER)

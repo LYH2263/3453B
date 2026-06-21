@@ -18,6 +18,10 @@
           <el-icon><Football /></el-icon>
           <span>活动中心</span>
         </el-menu-item>
+        <el-menu-item index="/leave-requests">
+          <el-icon><Document /></el-icon>
+          <span>活动请假</span>
+        </el-menu-item>
         <el-menu-item index="/interaction">
           <el-icon><ChatDotRound /></el-icon>
           <span>互动社区</span>
@@ -158,6 +162,7 @@ const currentRouteName = computed(() => {
     '/dashboard': '数据看板',
     '/clubs': '社团列表',
     '/activities': '活动中心',
+    '/leave-requests': '活动请假',
     '/interaction': '互动社区',
     '/votes': '社团投票',
     '/volunteer': '志愿服务',

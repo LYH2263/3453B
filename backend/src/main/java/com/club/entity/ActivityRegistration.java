@@ -9,7 +9,7 @@ public class ActivityRegistration {
     private Integer id;
     private Integer activityId;
     private Integer userId;
-    private String status; // REGISTERED, SIGNED_IN
+    private String status; // REGISTERED, SIGNED_IN, EXEMPTED
     private Integer rating;
     private String feedback;
     private String reply;
